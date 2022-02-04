@@ -11,6 +11,7 @@ currentEquipDose := NULL
 currentVac := NULL
 currentVacDose:= NULL
 
+; Equipment Name
 az_fn := "COVID-19 AstraZeneca"
 sv_fn := "CORONAVAC"
 pf_fn := "COVID-19 Pfizer"
@@ -32,9 +33,9 @@ md := "Moderna"
 vac_names := ["Astrazeneca", "Sinovac", "Pfizer", "Sinopharm", "Moderna"]
 
 f3key_timeout_msg := ["กดปุ่มตัวเลขไม่ทันในช่วงเวลาที่กำหนดไว้"]
-wrong_dose_msg := ["โดสที่ฉีดไม่ตรงกัน","แค่เลขโดสหลักเดียวยังไม่ตรง ซื้อหวยคงโดนกิน", ""]
-wrong_sn_msg := ["Serial ไม่ถูกต้อง", "Serial Serial Serial ...", "Hi, Serial ไม่ถูก สติไปไหนหมด"]
-wrong_vac_msg := ["วัคซีนตรงกันหรือเปล่า ?", "คีย์วัคซีนให้ตรงกันมันยากตรงไหน", "Hello เขาฉีดอะไรกันแน่ อันนึงคีย์อย่าง อันนี้คีย์อีกอย่าง"]
+wrong_dose_msg := ["ครั้งที่ฉีดไม่ตรงกับที่คีย์ในเวชภัณฑ์","แค่ฉีดโดสไหนยังกรอกไม่ถูก คงนานๆเหมือนถูกหวยซักครั้ง", "ครั้งที่ฉีดไม่ถูก กลับไปดูใหม่"]
+wrong_sn_msg := ["Serial ไม่ถูกต้อง",  "สวัสดี  Serial ไม่ถูก ใจลอยหรือ"]
+wrong_vac_msg := ["วัคซีนตรงกันหรือเปล่า ?", "คีย์วัคซีนให้ตรงกันมันยากตรงไหน", "วัคซีน F3 อย่าง วัคซีนก็อีกอย่าง"]
 
 SetTimer, WatchCursor, 100
 
@@ -85,7 +86,7 @@ CheckMouseHover(control, class){
 	else if(!isVaccineInEditMode && control == "TcxButton9" && class == "TDoctorWorkBenchVaccineEntryForm"){
 		ApplyVaccinateInfoToGlobal()
 	}
-	else if(!isVaccineInEditMode && control == "TcxButton10" && class == "TDoctorWorkBenchVaccineEntryForm"){ ;Exit Add
+	else if(!isVaccineInEditMode && control == "TcxButton10" && class == "TDoctorWorkBenchVaccineEntryForm"){
 		EmptyVaccineGlobalVar()
 	}
 }
@@ -188,6 +189,10 @@ currentVac := md_id
 InsertVaccine(md)
 return
 
+^S::
+ControlFocus, TcxCustomComboBoxInnerEdit2, ahk_class TDoctorWorkBenchVaccineEntryForm
+return
+
 ^T::	
 FinishingVaccine()
 return
@@ -223,21 +228,16 @@ AddEquipmentF3(name){
 InsertVaccine(name){
 	KeyWait, Alt
 	Input, dose, L1 T3
+	InsertDose(dose)
 	ControlFocus, TcxCustomComboBoxInnerEdit4, ahk_class TDoctorWorkBenchVaccineEntryForm
 	SendInput,^{a}{BackSpace}
 	SendInput,%name%
 	SendInput,{Down}{Enter}
-	Sleep, 2000
-	if(ErrorLevel == "Timeout"){
-		LotTextBoxFocus()
-	}
-	else{
-		InsertDose(dose)	
-	}
+	Sleep, 1700
+	LotTextBoxFocus()
 }
 
 InsertDose(dose){
-	;ControlClick, TcxCustomInnerTextEdit1, ahk_class TDoctorWorkBenchVaccineEntryForm,, LEFT, 1, NA
 	ControlFocus, TcxCustomInnerTextEdit1, ahk_class TDoctorWorkBenchVaccineEntryForm
 	Send,%dose%
 	LotTextBoxFocus()
@@ -264,7 +264,6 @@ FinishingVaccine(){
 	}
 }
 
-;Will split to modular function
 ValidateVaccine(){
 	global currentEquip, currentEquipDose, currentVac, currentVacDose, isVaccineInEditMode
 	global wrong_dose_msg, wrong_sn_msg, wrong_vac_msg, f3key_timeout_msg, vac_names
@@ -316,6 +315,7 @@ RandomMessageText(array_of_text){
 	Random, index, 1, % maxIndex
 	return array_of_text[index]
 }
+
 EmptyTextConverter(text){
 	if(text != NULL)
 		return text
@@ -359,6 +359,7 @@ DetermineFinishBtnStateOnEqScr(){
 	}
 
 }
+
 ValidateGlobalVars(){
 	global currentEquip, currentEquipDose, currentVac, currentVacDose
 	valid_flag := 0
@@ -374,7 +375,6 @@ ValidateGlobalVars(){
 	return valid_flag
 }
 
-;Done
 ;SubFunction of ValidateVaccine
 ApplyVaccinateInfoToGlobal(){
 	global az, sv, pf, sp, md, az_id, sv_id, pf_id, sp_id, md_id, currentVac
@@ -477,11 +477,13 @@ EmptyAllGlobalVar(){
 	currentVac := NULL
 	currentVacDose := NULL
 }
+
 EmptyEquipmentGlobalVar(){
 	global currentEquip, currentEquipDose
 	currentEquip := NULL
 	currentEquipDose := NULL
 }
+
 EmptyVaccineGlobalVar(){
 	global currentVac, currentVacDose
 	currentVac := NULL
