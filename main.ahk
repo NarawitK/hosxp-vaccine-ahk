@@ -94,6 +94,20 @@ CheckMouseHover(control, class){
 }
 
 
+SetDefaultKeyboard(LocaleID){
+	Static SPI_SETDEFAULTINPUTLANG := 0x0409, SPIF_SENDWININICHANGE := 2
+	
+	Lan := DllCall("LoadKeyboardLayout", "Str", Format("{:08x}", LocaleID), "Int", 0)
+	VarSetCapacity(binaryLocaleID, 4, 0)
+	NumPut(LocaleID, binaryLocaleID)
+	DllCall("SystemParametersInfo", "UInt", SPI_SETDEFAULTINPUTLANG, "UInt", 0, "UPtr", &binaryLocaleID, "UInt", SPIF_SENDWININICHANGE)
+	
+	WinGet, windows, List
+	Loop % windows {
+		PostMessage 0x50, 0, % Lan, , % "ahk_id " windows%A_Index%
+	}
+}
+
 #IfWinActive ahk_class TERDetailEntryForm
 ^F1::
 ControlFocus, TdxPickEdit7, ahk_class TERDetailEntryForm
@@ -129,7 +143,11 @@ return
 
 !C::
 currentEquip := pf_id
+if(A_Language != "041e"){
+	SetDefaultKeyboard(0x041e)
+}
 AddEquipmentF3(pfc_fn)
+SetDefaultKeyboard(0x0409)
 return
 
 !P::
@@ -280,6 +298,13 @@ ValidateVaccine(){
 	global currentEquip, currentEquipDose, currentVac, currentVacDose, isVaccineInEditMode
 	global wrong_dose_msg, wrong_sn_msg, wrong_vac_msg, f3key_timeout_msg, vac_names
 	invalid_flag := 0
+	ControlGetText, currentLot, TcxCustomComboBoxInnerEdit3, ahk_class TDoctorWorkBenchVaccineEntryForm
+	if(currentLot == NULL){
+		invalid_flag++
+		ChangeSendVaccineButtonState(False)
+		ChangeFinishButtonState(False)
+		MsgBox, 8208, Lot is empty,ไหน Lot, 5
+	}
 	if(!isVaccineInEditMode && currentEquip == NULL && currentEquipDose == NULL && currentVac == NULL && currentVacDose == NULL){
 		invalid_flag++
 		ChangeSendVaccineButtonState(False)
