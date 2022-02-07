@@ -17,6 +17,7 @@ sv_fn := "CORONAVAC"
 pf_fn := "COVID-19 Pfizer"
 sp_fn := "COVID-19 Sinopharm"
 md_fn := "COVID-19 Moderna"
+pfc_fn := "COVID-19 Pfizer เด็ก 5ปี ถึง<12ปี"
 
 az_id := 1
 sv_id := 2
@@ -29,6 +30,7 @@ sv := "Sinovac"
 pf := "Pfizer"
 sp := "Sinopharm"
 md := "Moderna"
+;pfc := "Pfizer (เด็กอายุ 5-11 ปี)"
 
 vac_names := ["Astrazeneca", "Sinovac", "Pfizer", "Sinopharm", "Moderna"]
 
@@ -125,6 +127,11 @@ currentEquip := pf_id
 AddEquipmentF3(pf_fn)
 return
 
+!C::
+currentEquip := pf_id
+AddEquipmentF3(pfc_fn)
+return
+
 !P::
 currentEquip := sp_id
 AddEquipmentF3(sp_fn)
@@ -175,6 +182,11 @@ InsertVaccine(sv)
 return
 
 !Z::
+currentVac := pf_id
+InsertVaccine(pf)
+return
+
+!C::
 currentVac := pf_id
 InsertVaccine(pf)
 return
@@ -377,7 +389,8 @@ ValidateGlobalVars(){
 
 ;SubFunction of ValidateVaccine
 ApplyVaccinateInfoToGlobal(){
-	global az, sv, pf, sp, md, az_id, sv_id, pf_id, sp_id, md_id, currentVac
+	global az, sv, pf, sp, md, pfc 
+	global az_id, sv_id, pf_id, sp_id, md_id, currentVac
 	ControlGetText, vaccine, TcxCustomComboBoxInnerEdit4, ahk_class TDoctorWorkBenchVaccineEntryForm
 	if(InStr(vaccine, az, false)){
 		currentVac := az_id	
@@ -385,7 +398,7 @@ ApplyVaccinateInfoToGlobal(){
 	else if(InStr(vaccine, sv)){
 		currentVac := sv_id
 	}
-	else if(InStr(vaccine, pf)){
+	else if(InStr(vaccine, pf) || InStr(vaccine, pfc)){
 		currentVac := pf_id
 	}
 	else if(InStr(vaccine, sp)){
@@ -403,7 +416,8 @@ ApplyVaccinateInfoToGlobal(){
 
 DetermineEquipmentByRegEx(){
 	ChangeFinishButtonState(False)
-	global currentEquip, currentEquipDose, sv_id, az_id, pf_id, sp_id, md_id, vac_names
+	global currentEquip, currentEquipDose, vac_names
+	global sv_id, az_id, pf_id, sp_id, md_id
 	Sleep, 200
 	ControlGetText, equip_text, TcxCustomInnerTextEdit9, ahk_class TERDetailEntryForm
 	if(InStr(equip_text, "CORONAVAC")){
@@ -414,7 +428,8 @@ DetermineEquipmentByRegEx(){
 		currentEquip := az_id
 		SetEquipDosageFromRegex(equip_text)
 	}
-	else if(InStr(equip_text, "Pfizer")){
+	; Pfizer Orange Label will be added here
+	else if(InStr(equip_text, "Pfizer") || InStr(equip_text, "Pfizer (เด็ก")){
 		currentEquip := pf_id
 		SetEquipDosageFromRegex(equip_text)
 	}
