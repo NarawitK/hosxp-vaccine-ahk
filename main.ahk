@@ -298,13 +298,6 @@ ValidateVaccine(){
 	global currentEquip, currentEquipDose, currentVac, currentVacDose, isVaccineInEditMode
 	global wrong_dose_msg, wrong_sn_msg, wrong_vac_msg, f3key_timeout_msg, vac_names
 	invalid_flag := 0
-	ControlGetText, currentLot, TcxCustomComboBoxInnerEdit3, ahk_class TDoctorWorkBenchVaccineEntryForm
-	if(currentLot == NULL){
-		invalid_flag++
-		ChangeSendVaccineButtonState(False)
-		ChangeFinishButtonState(False)
-		MsgBox, 8208, Lot is empty,ไหน Lot, 5
-	}
 	if(!isVaccineInEditMode && currentEquip == NULL && currentEquipDose == NULL && currentVac == NULL && currentVacDose == NULL){
 		invalid_flag++
 		ChangeSendVaccineButtonState(False)
@@ -454,7 +447,7 @@ DetermineEquipmentByRegEx(){
 		SetEquipDosageFromRegex(equip_text)
 	}
 	; Pfizer Orange Label will be added here
-	else if(InStr(equip_text, "Pfizer") || InStr(equip_text, "Pfizer (เด็ก")){
+	else if(InStr(equip_text, "Pfizer") || InStr(equip_text, "Pfizer เด็ก")){
 		currentEquip := pf_id
 		SetEquipDosageFromRegex(equip_text)
 	}
