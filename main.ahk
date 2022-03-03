@@ -34,6 +34,8 @@ md := "Moderna"
 
 vac_names := ["Astrazeneca", "Sinovac", "Pfizer", "Sinopharm", "Moderna"]
 
+vaccine_preset := {"vac_id": NULL ,"vac_name": NULL, "dose_no": NULL, "lot_no": NULL, "exp_date": NULL, "serial_no": NULL}
+
 f3key_timeout_msg := ["กดปุ่มตัวเลขไม่ทันในช่วงเวลาที่กำหนดไว้"]
 wrong_dose_msg := ["ครั้งที่ฉีดไม่ตรงกับที่คีย์ในเวชภัณฑ์","แค่ฉีดโดสไหนยังกรอกไม่ถูก คงนานๆเหมือนถูกหวยซักครั้ง", "ครั้งที่ฉีดไม่ถูก กลับไปดูใหม่"]
 wrong_sn_msg := ["Serial ไม่ถูกต้อง",  "สวัสดี  Serial ไม่ถูก ใจลอยหรือ"]
@@ -189,6 +191,7 @@ return
 
 
 #IfWinActive ahk_class TDoctorWorkBenchVaccineEntryForm
+
 !A::
 currentVac := az_id
 InsertVaccine(az)
@@ -219,13 +222,18 @@ currentVac := md_id
 InsertVaccine(md)
 return
 
+^D::
+PasteVaccinePreset(vaccine_preset)
+return
+
 ^S::
 ControlFocus, TcxCustomComboBoxInnerEdit2, ahk_class TDoctorWorkBenchVaccineEntryForm
 return
 
 ^T::	
-FinishingVaccine()
+FinishingVaccine(currentVac, vaccine_preset)
 return
+
 #IfWinActive
 
 AddEquipmentF3(name){
@@ -267,6 +275,21 @@ InsertVaccine(name){
 	LotTextBoxFocus()
 }
 
+;WIP
+PasteVaccinePreset(preset_list){
+	KeyWait, Ctrl
+	ControlFocus, TcxCustomInnerTextEdit1, ahk_class TDoctorWorkBenchVaccineEntryForm
+	Send, % preset_list["dose_no"]
+	ControlFocus, TcxCustomComboBoxInnerEdit3, ahk_class TDoctorWorkBenchVaccineEntryForm
+	Send, % preset_list["lot_no"]
+	ControlFocus, TcxCustomDropDownInnerEdit2, ahk_class TDoctorWorkBenchVaccineEntryForm
+	Send, % preset_list["exp_date"]
+	ControlFocus, TcxCustomComboBoxInnerEdit2, ahk_class TDoctorWorkBenchVaccineEntryForm
+	Send, % preset_list["serial_no"]
+	ControlFocus, TcxCustomComboBoxInnerEdit4, ahk_class TDoctorWorkBenchVaccineEntryForm
+	Send, % preset_list["vac_name"]
+}
+
 InsertDose(dose){
 	ControlFocus, TcxCustomInnerTextEdit1, ahk_class TDoctorWorkBenchVaccineEntryForm
 	Send,%dose%
@@ -277,7 +300,7 @@ LotTextBoxFocus(){
 	ControlFocus, TcxCustomComboBoxInnerEdit3, ahk_class TDoctorWorkBenchVaccineEntryForm
 }
 
-FinishingVaccine(){
+FinishingVaccine(currentVac, vaccine_preset){
 	KeyWait, Alt
 	ControlFocus, TcxButton3, ahk_class TDoctorWorkBenchVaccineEntryForm
 	Send,{Enter}
@@ -285,13 +308,28 @@ FinishingVaccine(){
 	Send,{Space}
 	ControlFocus, TcxButton2, ahk_class TDoctorWorkBenchVaccineEntryForm
 	Send,{Space}
-	if(ApplyVaccinateInfoToGlobal()){ 
+	if(ApplyVaccinateInfoToGlobal()){
+		SetVaccineDataToPreset(vaccine_preset)
 		ControlFocus, TcxButton9, ahk_class TDoctorWorkBenchVaccineEntryForm
 		Send, {Enter}
 	}
 	else{
 		return
 	}
+}
+
+;WIP
+SetVaccineDataToPreset(preset_list){
+	ControlGetText, vaccine_name, TcxCustomComboBoxInnerEdit4, ahk_class TDoctorWorkBenchVaccineEntryForm
+	ControlGetText, serial, TcxCustomComboBoxInnerEdit2, ahk_class TDoctorWorkBenchVaccineEntryForm
+	ControlGetText, exp_date, TcxCustomDropDownInnerEdit2, ahk_class TDoctorWorkBenchVaccineEntryForm
+	ControlGetText, lot, TcxCustomComboBoxInnerEdit3, ahk_class TDoctorWorkBenchVaccineEntryForm
+	ControlGetText, dose, TcxCustomInnerTextEdit1, ahk_class TDoctorWorkBenchVaccineEntryForm
+	preset_list["vac_name"] := vaccine_name
+	preset_list["dose_no"] := dose
+	preset_list["lot_no"] := lot
+	preset_list["exp_date"] := exp_date
+	preset_list["serial_no"] := serial
 }
 
 ValidateVaccine(){
@@ -327,7 +365,7 @@ ValidateVaccine(){
 		ChangeSendVaccineButtonState(False)
 		ChangeFinishButtonState(False)
 		msg := RandomMessageText(wrong_sn_msg)
-		MsgBox, 8208,Invalid Serial, %msg%, 5
+		MsgBox, 8208, Invalid Serial, %msg%, 5
 	}
 
 	if(invalid_flag){
@@ -368,11 +406,11 @@ ValidateSerial(currentVac, vaccineNameArray){
 					validationResult := 0
 				}
 			case 3:
-				if(StrLen(currentSerial) != 9 AND StrLen(currentSerial) != 12){
+				if(StrLen(currentSerial) != 9 && StrLen(currentSerial) != 12){
 					validationResult := 0
 				}
 			case 5:
-				if(StrLen(currentSerial) != 10){
+				if(StrLen(currentSerial) != 10 && StrLen(currentSerial) != 14){
 					validationResult := 0
 				}
 		}		
@@ -407,8 +445,7 @@ ValidateGlobalVars(){
 
 ;SubFunction of ValidateVaccine
 ApplyVaccinateInfoToGlobal(){
-	global az, sv, pf, sp, md, pfc 
-	global az_id, sv_id, pf_id, sp_id, md_id, currentVac
+	global az, sv, pf, sp, md, az_id, sv_id, pf_id, sp_id, md_id, currentVac
 	ControlGetText, vaccine, TcxCustomComboBoxInnerEdit4, ahk_class TDoctorWorkBenchVaccineEntryForm
 	if(InStr(vaccine, az, false)){
 		currentVac := az_id	
@@ -416,7 +453,7 @@ ApplyVaccinateInfoToGlobal(){
 	else if(InStr(vaccine, sv)){
 		currentVac := sv_id
 	}
-	else if(InStr(vaccine, pf) || InStr(vaccine, pfc)){
+	else if(InStr(vaccine, pf)){
 		currentVac := pf_id
 	}
 	else if(InStr(vaccine, sp)){
