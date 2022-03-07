@@ -52,14 +52,6 @@ CheckMouseHoverOnEquipmentClass(control){
 	if(control == "TcxButton10"){
 		ValidateVaccine()
 	}
-	else if(control == "TcxButton2"){
-		if(currentEquip == NULL || currentEquipDose == NULL){
-			Control, Disable,, TcxButton2
-		}
-		else{
-			Control, Enable,, TcxButton2
-		}
-	}
 }
 CheckMouseHoverInVaccineClass(control){
 	global isVaccineInEditMode
