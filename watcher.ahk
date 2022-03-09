@@ -13,7 +13,6 @@ WatchAndValidate(){
 	CheckEquipmentWindowExist()
 	RecordVaccinationOperation(class, control)
 	MouseHoverControlCheckByClass(class, control)
-	;CheckMouseHover(class, control)
 }
 
 CheckEquipmentWindowExist(){
@@ -38,25 +37,21 @@ RecordVaccinationOperation(class, control){
 
 MouseHoverControlCheckByClass(class, control){
 	switch class{
-		case "TERDetailEntryForm":
-			CheckMouseHoverOnEquipmentClass(control)
-			return
 		case "TDoctorWorkBenchVaccineEntryForm":
 			CheckMouseHoverInVaccineClass(control)
+			return
+		default:
 			return
 	}
 }
 
-CheckMouseHoverOnEquipmentClass(control){
-	global currentEquip, currentEquipDose
-	if(control == "TcxButton10"){
-		ValidateVaccine()
-	}
-}
+
 CheckMouseHoverInVaccineClass(control){
-	global isVaccineInEditMode
+	global isVaccineInEditMode, vaccine_preset
 	if(!isVaccineInEditMode && control == "TcxButton9"){
-		ApplyVaccinateInfoToGlobal()
+		if(ApplyVaccinateInfoToGlobal()){
+			SetVaccineDataToPreset(vaccine_preset)
+		}
 	}
 	else if(!isVaccineInEditMode && control == "TcxButton10"){
 		EmptyVaccineGlobalVar()
@@ -65,5 +60,12 @@ CheckMouseHoverInVaccineClass(control){
 		EmptyVaccineGlobalVar()
 	}
 }
+
+;CheckMouseHoverOnEquipmentClass(control){
+;	global currentEquip, currentEquipDose
+;	if(control == "TcxButton10"){
+;		ValidateVaccine()
+;	}
+;}
 
 #IfWinActive
