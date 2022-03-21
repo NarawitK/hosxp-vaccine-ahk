@@ -51,20 +51,39 @@ ValidateSerial(currentVac, vaccineNameArray){
 		Switch currentVac
 		{ 
 			case 1:
-				if(StrLen(currentSerial) != 14){
-					validationResult := 0
+				Switch StrLen(currentSerial)
+				{
+					case 14:
+						validationResult := 1
+					default:
+						validationResult := 0
 				}
 			case 2, case 4:
-				if(StrLen(currentSerial) != 20){
-					validationResult := 0
+				Switch StrLen(currentSerial)
+				{
+					case 20:
+						validationResult := 1
+					default:
+						validationResult := 0
 				}
 			case 3:
-				if(StrLen(currentSerial) != 9 && StrLen(currentSerial) != 12){
-					validationResult := 0
+				Switch StrLen(currentSerial)
+				{
+					case 9:
+					case 12:
+					case 14:
+						validationResult := 1
+					default:
+						validationResult := 0
 				}
 			case 5:
-				if(StrLen(currentSerial) != 10 && StrLen(currentSerial) != 14){
-					validationResult := 0
+				Switch StrLen(currentSerial)
+				{
+					case 10:
+					case 14:
+						validationResult := 1
+					default:
+						validationResult := 0
 				}
 		}		
 	}
