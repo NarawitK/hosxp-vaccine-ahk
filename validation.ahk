@@ -69,6 +69,7 @@ ValidateSerial(currentVac, vaccineNameArray){
 			case 3:
 				Switch StrLen(currentSerial)
 				{
+					case 6:
 					case 9:
 					case 12:
 					case 14:
