@@ -3,23 +3,23 @@
 	global wrong_dose_msg, wrong_sn_msg, wrong_vac_msg, f3key_timeout_msg, vac_names
 	invalid_flag := 0
 	if(!isVaccineInEditMode && currentEquip == NULL && currentEquipDose == NULL && currentVac == NULL && currentVacDose == NULL){
-		invalid_flag++
 		ChangeSendVaccineButtonState(False)
 		ChangeFinishButtonState(False)
+		invalid_flag++
 	}
 	
 	if(!isVaccineInEditMode && currentVacDose != NULL && currentEquipDose != currentVacDose){
-		invalid_flag++
 		ChangeSendVaccineButtonState(False)
 		ChangeFinishButtonState(False)
+		invalid_flag++
 		msg := RandomMessageText(wrong_dose_msg)
 		Msgbox, 8240, Invalid Dose Taken, % msg "`n" EmptyTextConverter(currentEquipDose) " กับ " EmptyTextConverter(currentVacDose), 5
 	}
 
 	if(!isVaccineInEditMode && currentEquip != currentVac){
-		invalid_flag++
 		ChangeSendVaccineButtonState(False)
 		ChangeFinishButtonState(False)
+		invalid_flag++
 		if(currentVac != NULL){
 			msg := RandomMessageText(wrong_vac_msg)
 			MsgBox, 8208, Vaccine not match, % msg "`n" EmptyTextConverter(vac_names[currentEquip]) " กับ " EmptyTextConverter(vac_names[currentVac]), 5			
@@ -27,9 +27,9 @@
 	}
 
 	if(!ValidateSerial(currentVac, vac_names)){
-		invalid_flag++
 		ChangeSendVaccineButtonState(False)
 		ChangeFinishButtonState(False)
+		invalid_flag++
 		msg := RandomMessageText(wrong_sn_msg)
 		MsgBox, 8208, Invalid Serial, %msg%, 5
 	}

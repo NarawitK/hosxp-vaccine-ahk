@@ -40,6 +40,9 @@ MouseHoverControlCheckByClass(class, control){
 		case "TDoctorWorkBenchVaccineEntryForm":
 			CheckMouseHoverInVaccineClass(control)
 			return
+		case "TERDetailEntryForm":
+			CheckMouseHoverOnEquipmentClass(control)
+			return
 		default:
 			return
 	}
@@ -61,11 +64,11 @@ CheckMouseHoverInVaccineClass(control){
 	}
 }
 
-;CheckMouseHoverOnEquipmentClass(control){
-;	global currentEquip, currentEquipDose
-;	if(control == "TcxButton10"){
-;		ValidateVaccine()
-;	}
-;}
+CheckMouseHoverOnEquipmentClass(control){
+	global currentEquip, currentEquipDose
+	if(control == "TcxButton10"){
+		ValidateVaccine()
+	}
+}
 
 #IfWinActive
