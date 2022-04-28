@@ -14,3 +14,13 @@ EmptyTextConverter(text){
 	else
 		return "..."
 }
+
+SetEquipmentDosage(){
+	KeyWait, Alt
+	Input, dose, L1 T3
+	if(dose == NULL || ErrorLevel = "Timeout"){
+		MsgBox, 8240, Equipment Hotkey Timeout,ไม่รู้จะเลือกเข็มไหนงั้นเหรอ... กลับไปมองกระดาษสิ, 5
+		return
+	}
+	return dose
+}

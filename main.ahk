@@ -27,36 +27,42 @@ return
 
 !A::
 currentEquip := az_id
-AddEquipmentF3(az_fn)
+dose := SetEquipmentDosage()
+AddEquipmentF3(az_fn, dose)
 return
 
 !S::
 currentEquip := sv_id
-AddEquipmentF3(sv_fn)
+dose := SetEquipmentDosage()
+AddEquipmentF3(sv_fn, dose)
 return
 
 !Z::
 currentEquip := pf_id
-AddEquipmentF3(pf_fn)
+dose := SetEquipmentDosage()
+AddEquipmentF3(pf_fn, dose)
 return
 
 !C::
 currentEquip := pf_id
+dose := SetEquipmentDosage()
 if(A_Language != "041e"){
 	SetDefaultKeyboard(0x041e)
 }
-AddEquipmentF3(pfc_fn)
+AddEquipmentF3(pfc_fn, dose)
 SetDefaultKeyboard(0x0409)
 return
 
 !P::
 currentEquip := sp_id
-AddEquipmentF3(sp_fn)
+dose := SetEquipmentDosage()
+AddEquipmentF3(sp_fn, dose)
 return
 
 !M::
 currentEquip := md_id
-AddEquipmentF3(md_fn)
+dose := SetEquipmentDosage()
+AddEquipmentF3(md_fn, dose)
 return
 
 #IfWinActive
