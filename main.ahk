@@ -53,6 +53,13 @@ AddEquipmentF3(pfc_fn, dose)
 SetDefaultKeyboard(0x0409)
 return
 
+; R is Pfizer Red Newly Added
+!R::
+currentEquip := pf_id
+dose := SetEquipmentDosage()
+AddEquipmentF3(pfr_fn, dose)
+return
+
 !P::
 currentEquip := sp_id
 dose := SetEquipmentDosage()
@@ -64,6 +71,11 @@ currentEquip := md_id
 dose := SetEquipmentDosage()
 AddEquipmentF3(md_fn, dose)
 return
+
+!X::
+currentEquip := cvx_id
+dose := SetEquipmentDosage()
+AddEquipmentF3(cvx_fn, dose)
 
 #IfWinActive
 
@@ -110,6 +122,12 @@ InsertVaccine(pf)
 return
 
 !C::
+currentVac := pf_id
+InsertVaccine(pf)
+return
+
+; R is Pfizer Red Newly Added
+!R::
 currentVac := pf_id
 InsertVaccine(pf)
 return

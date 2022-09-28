@@ -1,10 +1,4 @@
 ﻿AddEquipmentF3(name, dose){
-	;KeyWait, Alt
-	;Input, dose, L1 T3
-	;if(dose == NULL || ErrorLevel = "Timeout"){
-;		MsgBox, 8240, Equipment Hotkey Timeout,ไม่รู้จะเลือกเข็มไหนงั้นเหรอ... กลับไปมองกระดาษสิ, 5
-;		return
-;	}
 	ControlFocus, TcxCustomInnerTextEdit9, ahk_class TERDetailEntryForm
 	Send, {BackSpace}{BackSpace}
 	if(dose == 1){
@@ -50,11 +44,11 @@ LotTextBoxFocus(){
 FinishingVaccine(currentVac, vaccine_preset){
 	KeyWait, Alt
 	ControlFocus, TcxButton3, ahk_class TDoctorWorkBenchVaccineEntryForm
-	Send,{Enter}
+	Send, {Enter}
 	ControlFocus, TcxDBCheckBox2, ahk_class TDoctorWorkBenchVaccineEntryForm
-	Send,{Space}
+	Send, {Space}
 	ControlFocus, TcxButton2, ahk_class TDoctorWorkBenchVaccineEntryForm
-	Send,{Space}
+	Send, {Space}
 	if(ApplyVaccinateInfoToGlobal()){
 		SetVaccineDataToPreset(vaccine_preset)
 		ControlFocus, TcxButton9, ahk_class TDoctorWorkBenchVaccineEntryForm

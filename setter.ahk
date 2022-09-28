@@ -1,6 +1,6 @@
 ﻿;SubFunction of ValidateVaccine
 ApplyVaccinateInfoToGlobal(){
-	global az, sv, pf, sp, md, az_id, sv_id, pf_id, sp_id, md_id, currentVac
+	global az, sv, pf, sp, md, cvx, az_id, sv_id, pf_id, sp_id, md_id, cvx_id, currentVac
 	ControlGetText, vaccine, TcxCustomComboBoxInnerEdit4, ahk_class TDoctorWorkBenchVaccineEntryForm
 	if(InStr(vaccine, az, false)){
 		currentVac := az_id	
@@ -17,6 +17,9 @@ ApplyVaccinateInfoToGlobal(){
 	else if(InStr(vaccine, md)){
 		currentVac := md_id
 	}
+	else if(InStr(vaccine, cvx)){
+		currentVac := cvx_id
+	}
 	ControlGetText, dose , TcxCustomInnerTextEdit1, ahk_class TDoctorWorkBenchVaccineEntryForm
 	if(dose != NULL){
 		global currentVacDose := dose
@@ -27,27 +30,32 @@ ApplyVaccinateInfoToGlobal(){
 DetermineEquipmentByRegEx(){
 	ChangeFinishButtonState(False)
 	global currentEquip, currentEquipDose, vac_names
-	global sv_id, az_id, pf_id, sp_id, md_id
+	global az, sv, pf, pfc, sp, md, cvx
+	global sv_id, az_id, pf_id, sp_id, md_id, cvx_id
 	Sleep, 200
 	ControlGetText, equip_text, TcxCustomInnerTextEdit9, ahk_class TERDetailEntryForm
-	if(InStr(equip_text, "CORONAVAC")){
+	if(InStr(equip_text, sv)){
 		currentEquip := sv_id
 		SetEquipDosageFromRegex(equip_text)
 	}
-	else if(InStr(equip_text, "AstraZeneca")){
+	else if(InStr(equip_text, az)){
 		currentEquip := az_id
 		SetEquipDosageFromRegex(equip_text)
 	}
-	else if(InStr(equip_text, "Pfizer") || InStr(equip_text, "Pfizer เด็ก")){
+	else if(InStr(equip_text, pf) || InStr(equip_text, pfc)){
 		currentEquip := pf_id
 		SetEquipDosageFromRegex(equip_text)
 	}
-	else if(InStr(equip_text, "Sinopharm")){
+	else if(InStr(equip_text, sp)){
 		currentEquip := sp_id
 		SetEquipDosageFromRegex(equip_text)
 	}
-	else if(InStr(equip_text, "Moderna")){
+	else if(InStr(equip_text, md)){
 		currentEquip := md_id
+		SetEquipDosageFromRegex(equip_text)
+	}
+	else if(InStr(equip_text, cvx)){
+		currentEquip := cvx_id
 		SetEquipDosageFromRegex(equip_text)
 	}
 	else{

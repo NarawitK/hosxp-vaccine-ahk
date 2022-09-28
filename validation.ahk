@@ -86,6 +86,14 @@ ValidateSerial(currentVac, vaccineNameArray){
 					default:
 						validationResult := 0
 				}
+			case 6:
+				Switch StrLen(currentSerial)
+				{
+					case 9:
+						validationResult := 1
+					default:
+						validationResult := 0
+				}
 		}		
 	}
 	return validationResult
