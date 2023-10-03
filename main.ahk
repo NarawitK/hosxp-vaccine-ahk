@@ -1,96 +1,11 @@
-﻿; #NoTrayIcon
-#NoEnv
+﻿#NoEnv
 #SingleInstance Force
+SetWorkingDir %A_ScriptDir%
 
-; 0 = Add, 1 = Edit
-isVaccineInEditMode := false
-equipWindowExist := false
-
-currentEquip := NULL
-currentEquipDose := NULL
-currentVac := NULL
-currentVacDose:= NULL
-
-; Equipment Name
-az_fn := "COVID-19 AstraZeneca"
-sv_fn := "CORONAVAC"
-pf_fn := "COVID-19 Pfizer"
-sp_fn := "COVID-19 Sinopharm"
-md_fn := "COVID-19 Moderna"
-
-az_id := 1
-sv_id := 2
-pf_id := 3
-sp_id := 4
-md_id := 5
-
-az := "Astrazeneca"
-sv := "Sinovac"
-pf := "Pfizer"
-sp := "Sinopharm"
-md := "Moderna"
-
-vac_names := ["Astrazeneca", "Sinovac", "Pfizer", "Sinopharm", "Moderna"]
-
-f3key_timeout_msg := ["กดปุ่มตัวเลขไม่ทันในช่วงเวลาที่กำหนดไว้"]
-wrong_dose_msg := ["ครั้งที่ฉีดไม่ตรงกับที่คีย์ในเวชภัณฑ์","แค่ฉีดโดสไหนยังกรอกไม่ถูก คงนานๆเหมือนถูกหวยซักครั้ง", "ครั้งที่ฉีดไม่ถูก กลับไปดูใหม่"]
-wrong_sn_msg := ["Serial ไม่ถูกต้อง",  "สวัสดี  Serial ไม่ถูก ใจลอยหรือ"]
-wrong_vac_msg := ["วัคซีนตรงกันหรือเปล่า ?", "คีย์วัคซีนให้ตรงกันมันยากตรงไหน", "วัคซีน F3 อย่าง วัคซีนก็อีกอย่าง"]
-
-SetTimer, WatchCursor, 100
-
-WatchCursor:
-WatchAndValidate()
-return
-
-WatchAndValidate(){
-	MouseGetPos,,, id, control
-	WinGetTitle, title, ahk_id %id%
-	WinGetClass, class, ahk_id %id%
-	CheckEquipmentWindowExist()
-	RecordVaccinationOperation(control, class)
-	CheckMouseHover(control, class)
-}
-
-CheckEquipmentWindowExist(){
-	global equipWindowExist
-	if(!WinExist("ahk_class TERDetailEntryForm") && equipWindowExist){
-		equipWindowExist := !equipWindowExist
-		EmptyAllGlobalVar()
-	}
-	else{
-		equipWindowExist := 1
-	}
-}
-
-RecordVaccinationOperation(control, class){
-	if(class == "TDoctorWorkBenchVaccineListEntryForm" && control == "TcxButton5"){
-		global isVaccineInEditMode := 0
-	}
-	else if(class == "TDoctorWorkBenchVaccineListEntryForm" && control == "TcxButton4"){
-		global isVaccineInEditMode := 1
-	}
-}
-
-CheckMouseHover(control, class){
-	global isVaccineInEditMode
-	if(isVaccineInEditMode && control == "TcxButton10" && class == "TERDetailEntryForm"){
-		ValidateVaccine()
-	}
-	else if(!isVaccineInEditMode && control == "TcxButton10" && class == "TERDetailEntryForm"){
-		ValidateVaccine()
-	}
-	else if(isVaccineInEditMode && control == "TcxButton9" && class == "TDoctorWorkBenchVaccineEntryForm"){
-		EmptyVaccineGlobalVar()
-	}
-	else if(!isVaccineInEditMode && control == "TcxButton9" && class == "TDoctorWorkBenchVaccineEntryForm"){
-		ApplyVaccinateInfoToGlobal()
-	}
-	else if(!isVaccineInEditMode && control == "TcxButton10" && class == "TDoctorWorkBenchVaccineEntryForm"){
-		EmptyVaccineGlobalVar()
-	}
-}
-
+#Include global_vars.ahk
+#Include watcher.ahk
+#Include keyboard_layout.ahk
+#Include preset_function.ahk
 
 #IfWinActive ahk_class TERDetailEntryForm
 ^F1::
@@ -112,28 +27,55 @@ return
 
 !A::
 currentEquip := az_id
-AddEquipmentF3(az_fn)
+dose := SetEquipmentDosage()
+AddEquipmentF3(az_fn, dose)
 return
 
 !S::
 currentEquip := sv_id
-AddEquipmentF3(sv_fn)
+dose := SetEquipmentDosage()
+AddEquipmentF3(sv_fn, dose)
 return
 
 !Z::
 currentEquip := pf_id
-AddEquipmentF3(pf_fn)
+dose := SetEquipmentDosage()
+AddEquipmentF3(pf_fn, dose)
+return
+
+!C::
+currentEquip := pf_id
+dose := SetEquipmentDosage()
+if(A_Language != "041e"){
+	SetDefaultKeyboard(0x041e)
+}
+AddEquipmentF3(pfc_fn, dose)
+SetDefaultKeyboard(0x0409)
+return
+
+; R is Pfizer Red Newly Added
+!R::
+currentEquip := pf_id
+dose := SetEquipmentDosage()
+AddEquipmentF3(pfr_fn, dose)
 return
 
 !P::
 currentEquip := sp_id
-AddEquipmentF3(sp_fn)
+dose := SetEquipmentDosage()
+AddEquipmentF3(sp_fn, dose)
 return
 
 !M::
 currentEquip := md_id
-AddEquipmentF3(md_fn)
+dose := SetEquipmentDosage()
+AddEquipmentF3(md_fn, dose)
 return
+
+!X::
+currentEquip := cvx_id
+dose := SetEquipmentDosage()
+AddEquipmentF3(cvx_fn, dose)
 
 #IfWinActive
 
@@ -162,8 +104,8 @@ return
 
 #IfWinActive
 
-
 #IfWinActive ahk_class TDoctorWorkBenchVaccineEntryForm
+
 !A::
 currentVac := az_id
 InsertVaccine(az)
@@ -179,6 +121,17 @@ currentVac := pf_id
 InsertVaccine(pf)
 return
 
+!C::
+currentVac := pf_id
+InsertVaccine(pf)
+return
+
+; R is Pfizer Red Newly Added
+!R::
+currentVac := pf_id
+InsertVaccine(pf)
+return
+
 !P::
 currentVac := sp_id
 InsertVaccine(sp)
@@ -189,303 +142,21 @@ currentVac := md_id
 InsertVaccine(md)
 return
 
+^D::
+PasteVaccinePreset(vaccine_preset)
+return
+
 ^S::
 ControlFocus, TcxCustomComboBoxInnerEdit2, ahk_class TDoctorWorkBenchVaccineEntryForm
 return
 
 ^T::	
-FinishingVaccine()
+FinishingVaccine(currentVac, vaccine_preset)
 return
+
 #IfWinActive
 
-AddEquipmentF3(name){
-	KeyWait, Alt
-	Input, dose, L1 T3
-	if(dose == NULL || ErrorLevel = "Timeout"){
-		MsgBox, 8240, Equipment Hotkey Timeout,ไม่รู้จะเลือกเข็มไหนงั้นเหรอ... กลับไปมองกระดาษสิ, 5
-		return
-	}
-	ControlFocus, TcxCustomInnerTextEdit9, ahk_class TERDetailEntryForm
-	Send, {BackSpace}{BackSpace}
-	if(dose == 1){
-		Send,%name%
-		Sleep, 250
-		Send,{Enter}0
-	}
-	else{
-		times := dose-1
-		Send,%name%
-		Sleep, 250
-		Send, {Down %times%}{Enter}0
-	}
-	global currentEquipDose := dose
-	Sleep, 300
-	ControlClick, TcxButton14, ahk_class TERDetailEntryForm, เพิ่ม, LEFT, 1, NA
-	Sleep, 300
-	ControlClick, TcxButton2 , ahk_class TERDetailEntryForm, Vaccine, LEFT, 1, NA
-}
-
-InsertVaccine(name){
-	KeyWait, Alt
-	Input, dose, L1 T3
-	InsertDose(dose)
-	ControlFocus, TcxCustomComboBoxInnerEdit4, ahk_class TDoctorWorkBenchVaccineEntryForm
-	SendInput,^{a}{BackSpace}
-	SendInput,%name%
-	SendInput,{Down}{Enter}
-	Sleep, 1700
-	LotTextBoxFocus()
-}
-
-InsertDose(dose){
-	ControlFocus, TcxCustomInnerTextEdit1, ahk_class TDoctorWorkBenchVaccineEntryForm
-	Send,%dose%
-	LotTextBoxFocus()
-}
-
-LotTextBoxFocus(){
-	ControlFocus, TcxCustomComboBoxInnerEdit3, ahk_class TDoctorWorkBenchVaccineEntryForm
-}
-
-FinishingVaccine(){
-	KeyWait, Alt
-	ControlFocus, TcxButton3, ahk_class TDoctorWorkBenchVaccineEntryForm
-	Send,{Enter}
-	ControlFocus, TcxDBCheckBox2, ahk_class TDoctorWorkBenchVaccineEntryForm
-	Send,{Space}
-	ControlFocus, TcxButton2, ahk_class TDoctorWorkBenchVaccineEntryForm
-	Send,{Space}
-	if(ApplyVaccinateInfoToGlobal()){ 
-		ControlFocus, TcxButton9, ahk_class TDoctorWorkBenchVaccineEntryForm
-		Send, {Enter}
-	}
-	else{
-		return
-	}
-}
-
-ValidateVaccine(){
-	global currentEquip, currentEquipDose, currentVac, currentVacDose, isVaccineInEditMode
-	global wrong_dose_msg, wrong_sn_msg, wrong_vac_msg, f3key_timeout_msg, vac_names
-	invalid_flag := 0
-	if(!isVaccineInEditMode && currentEquip == NULL && currentEquipDose == NULL && currentVac == NULL && currentVacDose == NULL){
-		invalid_flag++
-		ChangeSendVaccineButtonState(False)
-		ChangeFinishButtonState(False)
-	}
-	
-	if(!isVaccineInEditMode && currentVacDose != NULL && currentEquipDose != currentVacDose){
-		invalid_flag++
-		ChangeSendVaccineButtonState(False)
-		ChangeFinishButtonState(False)
-		msg := RandomMessageText(wrong_dose_msg)
-		Msgbox, 8240, Invalid Dose Taken, % msg "`n" EmptyTextConverter(currentEquipDose) " กับ " EmptyTextConverter(currentVacDose), 5
-	}
-
-	if(!isVaccineInEditMode && currentEquip != currentVac){
-		invalid_flag++
-		ChangeSendVaccineButtonState(False)
-		ChangeFinishButtonState(False)
-		if(currentVac != NULL){
-			msg := RandomMessageText(wrong_vac_msg)
-			MsgBox, 8208, Vaccine not match, % msg "`n" EmptyTextConverter(vac_names[currentEquip]) " กับ " EmptyTextConverter(vac_names[currentVac]), 5			
-		}
-	}
-
-	if(!ValidateSerial(currentVac, vac_names)){
-		invalid_flag++
-		ChangeSendVaccineButtonState(False)
-		ChangeFinishButtonState(False)
-		msg := RandomMessageText(wrong_sn_msg)
-		MsgBox, 8208,Invalid Serial, %msg%, 5
-	}
-
-	if(invalid_flag){
-		return 0
-	}
-	else{
-		ChangeFinishButtonState(True)
-		ChangeSendVaccineButtonState(True)
-		return 1
-	}
-}
-
-RandomMessageText(array_of_text){
-	maxIndex := array_of_text.Length()
-	Random, index, 1, % maxIndex
-	return array_of_text[index]
-}
-
-EmptyTextConverter(text){
-	if(text != NULL)
-		return text
-	else
-		return "..."
-}
-
-ValidateSerial(currentVac, vaccineNameArray){
-	validationResult := 1
-	if(WinActive("ahk_class TDoctorWorkBenchVaccineEntryForm")){
-		ControlGetText, currentSerial, TcxCustomComboBoxInnerEdit2, ahk_class TDoctorWorkBenchVaccineEntryForm
-		Switch currentVac
-		{ 
-			case 1:
-				if(StrLen(currentSerial) != 14){
-					validationResult := 0
-				}
-			case 2, case 4:
-				if(StrLen(currentSerial) != 20){
-					validationResult := 0
-				}
-			case 3:
-				if(StrLen(currentSerial) != 9 AND StrLen(currentSerial) != 12){
-					validationResult := 0
-				}
-			case 5:
-				if(StrLen(currentSerial) != 10){
-					validationResult := 0
-				}
-		}		
-	}
-	return validationResult
-}
-
-DetermineFinishBtnStateOnEqScr(){
-	if(ValidateGlobalVars()){
-		ChangeFinishButtonState(True)
-	}
-	else{
-		ChangeFinishButtonState(False)
-	}
-
-}
-
-ValidateGlobalVars(){
-	global currentEquip, currentEquipDose, currentVac, currentVacDose
-	valid_flag := 0
-	if(currentEquip != NULL && currentEquipDose != NULL && currentVac != NULL && currentVacDose != NULL){
-		valid_flag++
-	}
-	if(currentEquip != currentVac){
-		valid_flag++
-	}
-	if(currentEquipDose != currentVacDose){
-		valid_flag++
-	}
-	return valid_flag
-}
-
-;SubFunction of ValidateVaccine
-ApplyVaccinateInfoToGlobal(){
-	global az, sv, pf, sp, md, az_id, sv_id, pf_id, sp_id, md_id, currentVac
-	ControlGetText, vaccine, TcxCustomComboBoxInnerEdit4, ahk_class TDoctorWorkBenchVaccineEntryForm
-	if(InStr(vaccine, az, false)){
-		currentVac := az_id	
-	}
-	else if(InStr(vaccine, sv)){
-		currentVac := sv_id
-	}
-	else if(InStr(vaccine, pf)){
-		currentVac := pf_id
-	}
-	else if(InStr(vaccine, sp)){
-		currentVac := sp_id
-	}
-	else if(InStr(vaccine, md)){
-		currentVac := md_id
-	}
-	ControlGetText, dose , TcxCustomInnerTextEdit1, ahk_class TDoctorWorkBenchVaccineEntryForm
-	if(dose != NULL){
-		global currentVacDose := dose
-		return ValidateVaccine()
-	}
-}
-
-DetermineEquipmentByRegEx(){
-	ChangeFinishButtonState(False)
-	global currentEquip, currentEquipDose, sv_id, az_id, pf_id, sp_id, md_id, vac_names
-	Sleep, 200
-	ControlGetText, equip_text, TcxCustomInnerTextEdit9, ahk_class TERDetailEntryForm
-	if(InStr(equip_text, "CORONAVAC")){
-		currentEquip := sv_id
-		SetEquipDosageFromRegex(equip_text)
-	}
-	else if(InStr(equip_text, "AstraZeneca")){
-		currentEquip := az_id
-		SetEquipDosageFromRegex(equip_text)
-	}
-	else if(InStr(equip_text, "Pfizer")){
-		currentEquip := pf_id
-		SetEquipDosageFromRegex(equip_text)
-	}
-	else if(InStr(equip_text, "Sinopharm")){
-		currentEquip := sp_id
-		SetEquipDosageFromRegex(equip_text)
-	}
-	else if(InStr(equip_text, "Moderna")){
-		currentEquip := md_id
-		SetEquipDosageFromRegex(equip_text)
-	}
-	else{
-		if(currentEquip != NULL || currentEquipDose != NULL){
-			currentEquip := NULL
-			currentEquipDose := NULL
-		}
-		ControlClick, TcxButton13, ahk_class TERDetailEntryForm,, LEFT, 2, NA
-	}
-}
-
-;SubFunc of "DetermineEquipmentByRegEx"
-SetEquipDosageFromRegex(equip_text){
-	global currentEquipDose
-	if(RegExMatch(equip_text, "(?<=เข็ม )[1-9]", dosage) > 0){
-		currentEquipDose := dosage
-	}
-}
-
-ChangeFinishButtonState(state){
-	if(state){
-		Control, Enable,, TcxButton10, ahk_class TERDetailEntryForm
-	}
-	else{
-		Control, Disable,, TcxButton10, ahk_class TERDetailEntryForm
-	}
-}
-
-;Change Send Vaccinate Button in Vaccinate Screen
-ChangeSendVaccineButtonState(state){
-	if(state){
-		Control, Enable,, TcxButton9, ahk_class TDoctorWorkBenchVaccineEntryForm
-	}
-	else{
-		Control, Disable,, TcxButton9, ahk_class TDoctorWorkBenchVaccineEntryForm
-	}
-}
-
-;Type: Utilities
-
-ToggleOnEditMode(){
-	global isVaccineInEditMode := !isVaccineInEditMode
-}
-
-;Clear Global Variables
-EmptyAllGlobalVar(){
-	global currentEquip, currentEquipDose, currentVac,  currentVacDose, isVaccineInEditMode
-	isVaccineInEditMode := false
-	currentEquip := NULL
-	currentEquipDose := NULL
-	currentVac := NULL
-	currentVacDose := NULL
-}
-
-EmptyEquipmentGlobalVar(){
-	global currentEquip, currentEquipDose
-	currentEquip := NULL
-	currentEquipDose := NULL
-}
-
-EmptyVaccineGlobalVar(){
-	global currentVac, currentVacDose
-	currentVac := NULL
-	currentVacDose := NULL
-}
+#Include validation.ahk
+#Include core_function.ahk
+#Include setter.ahk
+#Include utilities.ahk
